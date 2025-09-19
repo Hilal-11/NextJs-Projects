@@ -9,12 +9,11 @@ const UserSchema = new mongoose.Schema({
     },default: { url: "https://placehold.co/600x400", localpath: ""}},
     email: { type: String, required: true, trim: true, lowercase: true, },
     password: { type: String , required: true, trim: true,},
+    varifyOtp: { type: String, default: ""},
+    varifyOtpExpireAt: { type: String , default: 0},
     isVarified: { type: Boolean, default: false },
-    refreshToken:{ type: String },
-    forgetPasswordToken: { type: String},
-    forgetPasswordTokenExpiry: { type: Date},
-    emailVarificationToken: { type: String},
-    emailVarificationTokenExpiry:{ type: Date},
+    resetPasswordOTP: { type: String},
+    resetPasswordOTPExpiry: { type: Date},
 
 },{ timestamps: true})
 
