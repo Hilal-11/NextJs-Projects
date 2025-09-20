@@ -8,10 +8,10 @@ import auth from '../middlewares/auth.moddleware.js';
 authRoutes.post("/signup" , signUp)
 authRoutes.post("/login" , login)
 authRoutes.get("/authenticate" , auth , authenticate)
-authRoutes.get("/sendVarificationOTP" , auth , sendVarificationOTP)
-authRoutes.post("/varifyEmail" , auth ,  varifyEmail)
-authRoutes.get("/passwordResetOTP" , passwordResetOTP)
-authRoutes.post("/resetPassword" , resetPassword)
+authRoutes.get("/sendVarificationOTP" ,auth , sendVarificationOTP)
+authRoutes.post("/varifyEmail" ,  varifyEmail)
+authRoutes.get("/passwordResetOTP" , auth , passwordResetOTP)
+authRoutes.post("/resetPassword" ,auth ,  resetPassword)
 authRoutes.get("/logout" , auth , logout);
 authRoutes.get("/profile" , auth , userProfile)
 
