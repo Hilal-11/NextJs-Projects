@@ -6,14 +6,10 @@ const transporter = nodemailer.createTransport({
     host: process.env.MAILTRAP_HOST,
     port: process.env.MAILTRAP_PORT,
     auth: {
-        user: process.env.MAILTRAP_HOST,
+        user: process.env.MAILTRAP_USERNAME,
         pass: process.env.MAILTRAP_PASSWORD,
     },
     secure: false,
-    tls: {
-        rejectUnauthorized: false
-    }
-
 })
 
 export default transporter
