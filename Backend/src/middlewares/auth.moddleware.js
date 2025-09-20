@@ -3,8 +3,10 @@ import dotenv from 'dotenv'
 dotenv.config();
 
 const auth = async(req , res , next ) => {
+    console.log(req.cookies)
     try{
-        const { token } = req.cookies?.token
+        const token = req.cookies.token
+        console.log(token)
         if(!token) {
             return res.status(400).json({
                 success: false,
