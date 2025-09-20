@@ -13,7 +13,7 @@ const auth = async(req , res , next ) => {
         }
         // get the data from token
         try{
-            const payload = await jwt.verify(token , process.env.SECRET_KEY)
+            const payload = jwt.verify(token , process.env.SECRET_KEY)
             console.log("Decoded token = ", payload)
             req.user = payload
 
