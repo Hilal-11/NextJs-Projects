@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
 dotenv.config();
 import transporter from "../utils/nodeMailer.js";
-import bcrypt from "bcryptjs";
+
 
 const signUp = async (req , res) => {
     const { username , email , password } = req.body;
@@ -106,7 +106,8 @@ const login = async (req , res) => {
         // Create JWT Token
         const token = await jwt.sign({
             id: user._id,
-            user: user.email
+            name: user.username,
+            email: user.email,
         }, process.env.SECRET_KEY , { expiresIn: "24h"})
 
         const options = {
@@ -129,40 +130,42 @@ const login = async (req , res) => {
 }
 
 const authenticate = async (req , res) => {
-    const { userId } = req.user.id
+    const id  = req.user.id
+    console.log("my_id = ", id)
     try{
-        const user = await User.findById(userId)
+        const user = await User.findById(id)
         if(!user) {
-            return res.status(404).json({
+            return res.status(400).json({
                 success: false,
-                message: "user not found,  failed to authenticate"
+                message: "user not found, failed to authenticate"
             })
         }
-
+        console.log("response = " ,user)
         res.status(200).json({
             success: true,
             response: user,
             message: "user profile"
         })
     }catch(error) {
-        return res.status().json({
+        return res.status(400).json({
             success: false,
             message: "User is not authenticated"
         })
     }
 }
 
-const sendVarificationOTP = async () => {
-    const { id } = req.body;
+const sendVarificationOTP = async (req , res) => {
+    const id = req.user.id;
+    console.log(id)
     if(!id) {
-        return res.status().json({
-
+        return res.status(400).json({
+            success: false
         })
     }
     try{
-        const user = await User.findById({ id });
-        if(!user.isVarified){
-            return res.status().json({
+        const user = await User.findById(id);
+        if(user.isVarified){
+            return res.status(400).json({
                 success: false,
                 message: "User already varified"
             })
@@ -189,7 +192,7 @@ const sendVarificationOTP = async () => {
             .then((info) => {
                 console.log("Otp is sent successfully", info)
             }).catch((error) => {
-                console.log("Failed to sent OPT", error.message)
+                console.log("Failed to sent OPT \n", error.message)
             })
 
         // return success respons
@@ -208,7 +211,7 @@ const sendVarificationOTP = async () => {
 }
 
 const varifyEmail = async (req , res) => {
-    const { id , OTP } = user.body;
+    const { id , OTP } = req.body;
     if(!id || !OTP) {
         return res.status(400).json({
             success: false,
@@ -216,7 +219,7 @@ const varifyEmail = async (req , res) => {
         })
     }
     try{    
-        const user = await User.findById({ id })
+        const user = await User.findById({_id: id})
         if(!user){
             return res.status(400).json({
                 success: false,
@@ -224,7 +227,7 @@ const varifyEmail = async (req , res) => {
             })
         }
         //  VARIFY THE OTP
-        if(user.varifyOtp === '' || user.varifyOtp !== OTP) {
+        if(user.varifyOtp == '' || user.varifyOtp != OTP) {
             return res.status(401).json({
                 success: false,
                 message: "Invalid OTP"
@@ -238,7 +241,7 @@ const varifyEmail = async (req , res) => {
             })
         }
 
-        user.varifyEmail = true;
+        user.isVarified = true;
         user.varifyOtp = '',
         user.varifyOtpExpireAt = 0
 
@@ -247,7 +250,7 @@ const varifyEmail = async (req , res) => {
         return res.status(200).json({ success: true , message: "Email Varified Successfully"})
 
     }catch(error) {
-        return res.status().json({
+        return res.status(400).json({
             success: false,
             message: "Email varification failed",
             error: error.message
@@ -271,15 +274,15 @@ const logout = async (req , res) => {
 }
 
 const passwordResetOTP = async (req , res) => {
-    const { email } = req.body
-    if(!email) {
+    const id = req.user.id
+    if(!id) {
         return res.status(400).json({
             success: false,
             message: "user not found while trying to forgetting password"
         })
     }
     try{
-        const user = await User.findById(email)
+        const user = await User.findById({_id: id})
         if(!user) {
             res.status(400).json({
                 success: true,
@@ -322,17 +325,22 @@ const passwordResetOTP = async (req , res) => {
     }
 }
 
+
 const resetPassword = async (req , res) => {
-    const { email ,OTP ,  newPassword } = req.body;
+    const id = req.user.id
+    const { email , OTP ,  newPassword } = req.body;
+    console.log(email , OTP , newPassword)
     if(!email || !OTP || !newPassword) {
-        res.status(400).json({
+        return res.status(400).json({
             success: false,
             message: "invalid cradentials"
          })
     }
     try{
 
-        const user = await User.findOne(email)
+        const user = await User.findOne({_id: id})
+        
+        console.log(user)
         if(!user) {
             res.status(401).json({
             success: false,
@@ -340,7 +348,7 @@ const resetPassword = async (req , res) => {
          })
         }
 
-        if(user.resetPasswordOTP === '' || user.resetPasswordOTP !== OTP) {
+        if(user.resetPasswordOTP == '' || user.resetPasswordOTP != OTP) {
             res.status(400).json({
                 success: false,
                 message: "Invalid reset password OTP"
@@ -357,6 +365,8 @@ const resetPassword = async (req , res) => {
         user.resetPasswordOTP = '';
         user.resetPasswordOTPExpiry = 0
 
+        await user.save();
+
         res.status(200).json({
             success: true,
             message: "Password reset successfully"
@@ -372,15 +382,15 @@ const resetPassword = async (req , res) => {
 }
 
 const userProfile = async (req , res) => {
-    const { userId } = req.user.id
-    if(!userId) {
+    const id = req.user.id
+    if(!id) {
        return res.status(400).json({
             success: false,
             message: "invalid user"
         }) 
     }
     try{
-        const user = await User.findById(userId.toString()).select('-password')
+        const user = await User.findById(id.toString()).select('-password')
         if(!user) {
             return res.status(401).json({
                 success: false,
