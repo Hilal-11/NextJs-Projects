@@ -3,11 +3,11 @@ import dotenv from 'dotenv'
 dotenv.config();
 
 const transporter = nodemailer.createTransport({
-    host: 'smtp-relay.brevo.com',
-    port: 501,
+    host: process.env.MAILTRAP_HOST,
+    port: process.env.MAILTRAP_PORT,
     auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
+        user: process.env.MAILTRAP_HOST,
+        pass: process.env.MAILTRAP_PASSWORD,
     },
     secure: false,
     tls: {
