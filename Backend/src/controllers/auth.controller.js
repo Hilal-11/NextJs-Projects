@@ -34,15 +34,13 @@ const signUp = async (req , res) => {
         }
         // generate JWT token
         const token = jwt.sign({ 
-            id: user._id, 
+            id: user.id, 
             user: user.email, 
             name: user.username
         },process.env.SECRET_KEY, { expiresIn: "24h"})
 
         const options = {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'none': 'strict',
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         }
         // set JWT Token in cookies
@@ -65,7 +63,7 @@ const signUp = async (req , res) => {
             })
         // save user on DB
 
-          return res.json({
+          return res.status(200).json({
             success: true,
             message: "Successful regestration"
         })
@@ -81,7 +79,7 @@ const signUp = async (req , res) => {
     }
 }
 
-const login = async () => {
+const login = async (req , res) => {
     const { email , password } = req.body;
     if(!email || !password) {
         return res.status(400).json({
@@ -97,7 +95,7 @@ const login = async () => {
                 message: "user is not exists in DB please register first"
             })
         }
-        const isMatchPassword = await bcrypt.compare(password , user.password)
+        const isMatchPassword = await user.isPasswordCorrect(password);
         if(!isMatchPassword) {
             return res.status(401).json({
                 success: false,
@@ -113,8 +111,6 @@ const login = async () => {
 
         const options = {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'none': 'strict',
             maxAge: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
         }
         res.cookie("cookie" , token, {options})
