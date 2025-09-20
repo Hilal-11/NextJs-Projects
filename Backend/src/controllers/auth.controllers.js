@@ -19,7 +19,7 @@ const signUp = async (req , res) => {
             return res.status(401).json({
                 success: false,
                 message: "User already register or exists"
-            }) 
+            })
         }
         const user = await User.create({
             username,
@@ -227,7 +227,11 @@ const varifyEmail = async (req , res) => {
         return res.status(200).json({ success: true , message: "Email Varified Successfully"})
 
     }catch(error) {
-        
+        return res.status().json({
+            success: false,
+            message: "Email varification failed",
+            error: error.message
+        })
     }
 }
 
