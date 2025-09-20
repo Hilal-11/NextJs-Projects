@@ -132,6 +132,30 @@ const login = async () => {
     }
 }
 
+const authenticate = async (req , res) => {
+    const { userId } = req.user.id
+    try{
+        const user = await User.findById(userId)
+        if(!user) {
+            return res.status(404).json({
+                success: false,
+                message: "user not found,  failed to authenticate"
+            })
+        }
+
+        res.status(200).json({
+            success: true,
+            response: user,
+            message: "user profile"
+        })
+    }catch(error) {
+        return res.status().json({
+            success: false,
+            message: "User is not authenticated"
+        })
+    }
+}
+
 const sendVarificationOTP = async () => {
     const { id } = req.body;
     if(!id) {
@@ -237,13 +261,7 @@ const varifyEmail = async (req , res) => {
 
 const logout = async (req , res) => {
     try{
-        res.clearCookie("cookie" , {
-             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'none': 'strict',
-            maxAge: Date.now() + 24 * 60 * 60 * 1000 
-        })
-
+        res.cookie("token" , "" , {})
         res.status(200).json({
             success: true,
             message: "Logout successfully"
@@ -358,15 +376,15 @@ const resetPassword = async (req , res) => {
 }
 
 const userProfile = async (req , res) => {
-    const { id } = req.body
-    if(!id) {
+    const { userId } = req.user.id
+    if(!userId) {
        return res.status(400).json({
             success: false,
             message: "invalid user"
         }) 
     }
     try{
-        const user = await User.findById(id)
+        const user = await User.findById(userId.toString()).select('-password')
         if(!user) {
             return res.status(401).json({
                 success: false,
@@ -387,4 +405,4 @@ const userProfile = async (req , res) => {
     }
 }
 
-export { signUp , login , sendVarificationOTP , varifyEmail , logout, passwordResetOTP , resetPassword , userProfile }
+export { signUp , login , authenticate ,sendVarificationOTP , varifyEmail , logout, passwordResetOTP , resetPassword , userProfile }
