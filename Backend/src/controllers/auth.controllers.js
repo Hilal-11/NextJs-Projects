@@ -50,7 +50,7 @@ const signUp = async (req , res) => {
         
         // send welcome mail on Gmail 
         const mailOptions = {
-            from: process.env.SENDER_MAIL,
+            from: process.env.MAILTRAP_SENDEREMAIL,
             to: user.email,
             subject: `Hi ${user.username} welcome in Keep.com`,
             text: "Welcome to Keep",
@@ -182,7 +182,7 @@ const sendVarificationOTP = async () => {
 
         // Send OTP on Emial
         const mailOptions = {
-            from: process.env.SENDER_MAIL,
+            from: process.env.MAILTRAP_SENDEREMAIL,
             to: user.email,
             subject: `User varification OTP,  use thia OTP ${OTP} to varify your account`,
             text: "Welcome to Keep",
@@ -295,7 +295,7 @@ const passwordResetOTP = async (req , res) => {
         const OTP = String(Math.floor(100000 + Math.random() * 900000));
 
         const mailOptions = {
-            from: process.env.SENDER_MAIL,
+            from: process.env.MAILTRAP_SENDEREMAIL,
             to: user.email,
             subject: `Reset password OTP,  use this OTP ${OTP} to Reset your password`,
             text: "Welcome to Keep",
